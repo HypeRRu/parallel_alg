@@ -20,23 +20,28 @@ CXX						:= $(CC) $(OPTIMIZATION) $(CXXFLAGS) $(STANDART)
 
 # common files
 COMMON_SRC				:= $(SRCDIR)/common/matrix.cpp
-IPC_SRC					:= $(SRCDIR)/ipc/socket.cpp $(SRCDIR)/ipc/unix_socket.cpp $(SRCDIR)/ipc/matrix_algorithms.cpp
+IPC_SRC					:= $(SRCDIR)/ipc/socket.cpp $(SRCDIR)/ipc/matrix_algorithms.cpp
+IPC_UNIX_SRC			:= $(SRCDIR)/ipc/unix_socket.cpp $(IPC_SRC)
 THREADS_SRC				:= $(SRCDIR)/threads/tasks.cpp $(SRCDIR)/threads/matrix_algorithms.cpp
 
 # read process files
-READ_PROCESS_SRC		:= $(SRCDIR)/ipc/read_proc.cpp $(COMMON_SRC) $(IPC_SRC)
+READ_PROCESS_SRC		:= $(SRCDIR)/ipc/read_proc.cpp $(COMMON_SRC) $(IPC_UNIX_SRC)
 READ_PROCESS_OBJ		:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(READ_PROCESS_SRC:.$(SRCEXT)=.$(OBJEXT)))
 READ_PROCESS_TARGET		:= $(TARGETDIR)/read_process
 
 #calc process files
-CALC_PROCESS_SRC		:= $(SRCDIR)/ipc/calc_proc.cpp $(COMMON_SRC) $(IPC_SRC)
+CALC_PROCESS_SRC		:= $(SRCDIR)/ipc/calc_proc.cpp $(COMMON_SRC) $(IPC_UNIX_SRC)
 CALC_PROCESS_OBJ		:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(CALC_PROCESS_SRC:.$(SRCEXT)=.$(OBJEXT)))
 CALC_PROCESS_TARGET		:= $(TARGETDIR)/calc_process
 
 # out process files
-WRITE_PROCESS_SRC		:= $(SRCDIR)/ipc/write_proc.cpp $(COMMON_SRC) $(IPC_SRC)
+WRITE_PROCESS_SRC		:= $(SRCDIR)/ipc/write_proc.cpp $(COMMON_SRC) $(IPC_UNIX_SRC)
 WRITE_PROCESS_OBJ		:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(WRITE_PROCESS_SRC:.$(SRCEXT)=.$(OBJEXT)))
 WRITE_PROCESS_TARGET	:= $(TARGETDIR)/write_process
+
+PROCESSING_SRC			:= $(SRCDIR)/ipc/processing.cpp $(COMMON_SRC) $(IPC_SRC)
+PROCESSING_OBJ			:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(PROCESSING_SRC:.$(SRCEXT)=.$(OBJEXT)))
+PROCESSING_TARGET		:= $(TARGETDIR)/processing
 
 # threading files
 THREADING_SRC			:= $(SRCDIR)/threads/threads.cpp $(COMMON_SRC) $(THREADS_SRC)
@@ -53,9 +58,10 @@ SOURCES					:= $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS					:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
 
 
-all: processing threading threading_extended
+all: processing processing-unix threading threading_extended
 
-processing: resources $(READ_PROCESS_TARGET) $(CALC_PROCESS_TARGET) $(WRITE_PROCESS_TARGET)
+processing: resources $(PROCESSING_TARGET)
+processing-unix: resources $(READ_PROCESS_TARGET) $(CALC_PROCESS_TARGET) $(WRITE_PROCESS_TARGET)
 threading: resources $(THREADING_TARGET)
 threading_extended: resources $(EXTENDED_TARGET)
 
@@ -68,6 +74,9 @@ $(CALC_PROCESS_TARGET): $(CALC_PROCESS_OBJ)
 
 $(WRITE_PROCESS_TARGET): $(WRITE_PROCESS_OBJ)
 	$(CC) -o $(WRITE_PROCESS_TARGET) $^ $(LIB)
+
+$(PROCESSING_TARGET): $(PROCESSING_OBJ)
+	$(CC) -o $(PROCESSING_TARGET) $^ $(LIB)
 
 $(THREADING_TARGET): $(THREADING_OBJ)
 	$(CC) -o $(THREADING_TARGET) $^ $(LIB)
@@ -92,7 +101,6 @@ directories:
 clean:
 	@rm -fr $(BUILDDIR)
 	@rm -fr $(TARGETDIR)
-	@rm -fr $(TARGETDIR)/$(RESDIR)/
 
 # full clean: objects and binaries
 cleaner: clean

@@ -1,6 +1,6 @@
 print_usage ()
 {
-    echo "Usage: run.sh {processing|threading|threading-extended} [repeat-count]"
+    echo "Usage: run.sh {processing|processing-unix|threading|threading-extended} [repeat-count]"
 }
 
 run_type="${1}"
@@ -8,16 +8,25 @@ reps_count="${2}"
 
 case "${run_type}" in
     processing)
-        TIMEFORMAT="Execution time (threading-extended) %R"
-        time
-        {
+        TIMEFORMAT="Execution time (processing) %R"
+        time {
+            for i in $(seq ${reps_count:-100}); do
+                ./target/processing
+            done
+            mv assets/out.txt target/assets/out.processing.txt
+        }
+    ;;
+    processing-unix)
+        TIMEFORMAT="Execution time (processing) %R"
+        time {
             for i in $(seq ${reps_count:-10}); do
                 ./target/read_process &
-                sleep 0.2
+                sleep 0.1
                 ./target/calc_process &
-                sleep 0.2
+                sleep 0.1
                 ./target/write_process &
             done
+            mv assets/out.txt target/assets/out.unix.txt
         }
     ;;
     threading)
@@ -26,7 +35,7 @@ case "${run_type}" in
             for i in $(seq ${reps_count:-100}); do
                 ./target/threading
             done
-            mv assets/out.txt assets/out.threading.txt
+            mv assets/out.txt target/assets/out.threading.txt
         }
     ;;
     threading-extended)
@@ -35,7 +44,7 @@ case "${run_type}" in
             for i in $(seq ${reps_count:-100}); do
                 ./target/threading_extended
             done
-            mv assets/out.txt assets/out.extended.txt
+            mv assets/out.txt target/assets/out.extended.txt
         }
     ;;
     *)
