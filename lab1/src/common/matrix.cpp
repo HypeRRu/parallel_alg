@@ -35,23 +35,26 @@ void common::Matrix::set( size_t row, size_t column, float el )
 } // set
 
 
-float common::Matrix::multiplyRC( const Matrix& lhs, const Matrix& rhs, size_t rown, size_t coln )
+void common::Matrix::multiplyRC( const Matrix& lhs, const Matrix& rhs, Matrix& result, size_t pos )
 {
     if ( lhs.columns() != rhs.rows() )
     {
         throw std::out_of_range{ "Invalid matrices size" };
     }
-    if ( lhs.rows() <= rown || rhs.columns() <= coln )
+    if ( lhs.columns() <= pos )
     {
         throw std::out_of_range{ "Out of range" };
     }
 
     float element = 0.f;
-    for ( size_t i = 0; i < lhs.columns(); ++i )
+    for ( size_t row = 0; row < lhs.rows(); ++row)
     {
-        element += lhs.get( rown, i ) * rhs.get( i, coln );
+        for ( size_t column = 0; column < rhs.columns(); ++column )
+        {
+            element = lhs.get( row, pos ) * rhs.get( pos, column );
+            result.set( row, column, element );
+        }
     }
-    return element;
 } // multiplyRC
 
 

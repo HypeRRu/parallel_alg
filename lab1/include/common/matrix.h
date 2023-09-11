@@ -91,11 +91,11 @@ public:
     /// @brief Умножение строки rown матрицы а на столбец coln матрицы b.
     /// @param[in] lhs Умножаемая матрица (левый операнд).
     /// @param[in] rhs Матрица, на которую производится умножение (правый операнд).
-    /// @param[in] rown Номер строки матрицы lhs.
-    /// @param[in] coln Номер столбца матрицы b.
+    /// @param[in] result Результирующая матрица.
+    /// @param[in] pos Номер столбца lhs и строки rhs.
     /// @return Значение элемента - результат умножения.
     /// @throws std::out_of_range в случае неверно заданного номера строки или столбца.
-    static float    multiplyRC( const Matrix& lhs, const Matrix& rhs, size_t rown, size_t coln );
+    static void     multiplyRC( const Matrix& lhs, const Matrix& rhs, Matrix& result, size_t pos );
 
 private:
     size_t rows_;               ///< Количество строк в матрице.
