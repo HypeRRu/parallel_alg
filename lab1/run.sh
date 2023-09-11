@@ -8,7 +8,7 @@ reps_count="${2}"
 
 case "${run_type}" in
     processing)
-        TIMEFORMAT="Execution time (processing) %R"
+        TIMEFORMAT="Execution time (processing) real=%R user=%U sys=%S"
         time {
             for i in $(seq ${reps_count:-100}); do
                 ./target/processing
@@ -17,7 +17,7 @@ case "${run_type}" in
         }
     ;;
     processing-unix)
-        TIMEFORMAT="Execution time (processing) %R"
+        TIMEFORMAT="Execution time (processing) real=%R user=%U sys=%S"
         time {
             for i in $(seq ${reps_count:-10}); do
                 ./target/read_process &
@@ -30,7 +30,7 @@ case "${run_type}" in
         }
     ;;
     threading)
-        TIMEFORMAT="Execution time (threading) %R"
+        TIMEFORMAT="Execution time (threading) real=%R user=%U sys=%S"
         time {
             for i in $(seq ${reps_count:-100}); do
                 ./target/threading
@@ -39,7 +39,7 @@ case "${run_type}" in
         }
     ;;
     threading-extended)
-        TIMEFORMAT="Execution time (threading-extended) %R"
+        TIMEFORMAT="Execution time (threading-extended) real=%R user=%U sys=%S"
         time {
             for i in $(seq ${reps_count:-100}); do
                 ./target/threading_extended

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #include "common/matrix.h"
 #include "ipc/defs.h"
@@ -53,6 +55,7 @@ int main()
 	}
 
 	int socketPairCW[2];
+	pid_t forkedCW = 0;
 	if ( ipc::ProcessType::CalcProcess == ptype )
 	{
 		if ( -1 == socketpair( AF_LOCAL, SOCK_STREAM, 0, socketPairCW ) )
@@ -60,7 +63,7 @@ int main()
 			std::cerr << "Unable to create socket pair for calc and write processes\n";
 			return 1;
 		}
-		pid_t forkedCW = fork();
+		forkedCW = fork();
 
 		switch ( forkedCW )
 		{
@@ -83,8 +86,10 @@ int main()
 			ipc::Socket readCalcSocket{ socketPairRC[ 0 ] };
 			if ( !ReadProcessDo( readCalcSocket ) )
 			{
+				(void) waitpid( forkedRC, nullptr, 0 );
 				return 1;
 			}
+			(void) waitpid( forkedRC, nullptr, 0 );
 			break;
 		}
 		case ipc::ProcessType::CalcProcess:
@@ -93,8 +98,10 @@ int main()
 			ipc::Socket calcWriteSocket{ socketPairCW[ 0 ] };
 			if ( !CalcProcessDo( readCalcSocket, calcWriteSocket ) )
 			{
+				(void) waitpid( forkedCW, nullptr, 0 );
 				return 1;
 			}
+			(void) waitpid( forkedCW, nullptr, 0 );
 			break;
 		}
 		case ipc::ProcessType::WriteProcess:
