@@ -2,9 +2,14 @@
 
 #include "threads/tasks.h"
 
-int main()
+int main( int argc, char **argv )
 {
-    threads::Tasks tasks( true );
+    if ( argc != 2 )
+    {
+        std::cerr << "Usage: ./threads-extended {threads-count}\n";
+        return 1;
+    }
+    threads::Tasks tasks( std::stoull( argv[1], nullptr, 10 ) );
     if ( !tasks.isValid() )
     {
         std::cerr << "Tasks failed\n";

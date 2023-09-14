@@ -7,7 +7,7 @@
 #include <fstream>
 
 
-threads::Tasks::Tasks( bool parallelMultiply )
+threads::Tasks::Tasks( size_t threadsCount )
     : lhs_{ 0, 0 }
     , rhs_{ 0, 0 }
     , result_{ 0, 0 }
@@ -17,10 +17,10 @@ threads::Tasks::Tasks( bool parallelMultiply )
 {
     threads_.emplace_back( &threads::Tasks::readMatrices, this
         , std::ref( lhs_ ), std::ref( rhs_ ) );
-    if ( parallelMultiply )
+    if ( threadsCount > 1 )
     {
-        threads_.emplace_back( &threads::Tasks::multiplyMatricesParallel
-            , this, std::cref( lhs_ ), std::cref( rhs_ ), std::ref( result_ ) );
+        threads_.emplace_back( &threads::Tasks::multiplyMatricesParallel, this
+            , std::cref( lhs_ ), std::cref( rhs_ ), std::ref( result_ ), threadsCount );
     }
     else
     {
@@ -96,10 +96,9 @@ void threads::Tasks::multiplyMatricesSerial( const common::Matrix& lhs, const co
 } // multiplyMatricesSerial
 
 
-void threads::Tasks::multiplyMatricesParallel( const common::Matrix& lhs, const common::Matrix& rhs, common::Matrix& result )
+void threads::Tasks::multiplyMatricesParallel( const common::Matrix& lhs, const common::Matrix& rhs
+        , common::Matrix& result, size_t threadsCount )
 {
-    constexpr size_t threads = 8;
-
     waitForAtomicBool( calcAllowed_, true );
     if ( !isValid_.load( std::memory_order_seq_cst ) )
     {
@@ -107,7 +106,7 @@ void threads::Tasks::multiplyMatricesParallel( const common::Matrix& lhs, const 
         return;
     }
 
-    result = threads::multiplyMatricesParallel( lhs, rhs, threads );
+    result = threads::multiplyMatricesParallel( lhs, rhs, threadsCount );
 #ifdef DEBUG
     std::cout << "Result matrix (parallel)\n";
     common::Matrix::write( result, std::cout );

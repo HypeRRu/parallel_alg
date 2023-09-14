@@ -15,8 +15,8 @@ class Tasks
 {
 public:
     /// @brief Конструктор менеджера потоков.
-    /// @param[in] parallelMultiply Использовать параллельный алгоритм умножения.
-    Tasks( bool parallelMultiply = false );
+    /// @param[in] threadsCount Количество потоков для умножения.
+    Tasks( size_t threadsCount = 1 );
 
     /// @brief Валидность программы.
     bool isValid() const;
@@ -35,8 +35,10 @@ public:
     /// @brief Поток умножения матриц. Умножение параллельное (создается поток для каждого результирующего элемента).
     /// @param[in] lhs Левая умножаемая матрица.
     /// @param[in] rhs Правая умножаемая матрица.
+    /// @param[in] threadsCount Количество потоков.
     /// @param[out] result Результирующая матрица.
-    void multiplyMatricesParallel( const common::Matrix& lhs, const common::Matrix& rhs, common::Matrix& result );
+    void multiplyMatricesParallel( const common::Matrix& lhs, const common::Matrix& rhs
+        , common::Matrix& result, size_t threadsCount );
 
     /// @brief Поток записи результирующей матрицы.
     /// @param[in] result Результирующая матрица.
