@@ -12,15 +12,19 @@ common::Matrix threads::multiplyMatricesSerial( const common::Matrix& lhs, const
         std::runtime_error{ "Cannot multiply matrices: invalid sizes" };
     }
     common::Matrix result{ lhs.rows(), rhs.columns() };
-    for ( size_t pos = 0; pos < lhs.columns(); ++pos )
+    for ( size_t row = 0; row < lhs.rows(); ++row )
     {
-        common::Matrix::multiplyRC( lhs, rhs, result, pos );
+        for ( size_t column = 0; column < rhs.columns(); ++column )
+        {
+            result.set( row, column, common::Matrix::multiplyRC( lhs, rhs, row, column ) );
+        }
     }
     return result;
 } // multiplyMatricesSerial
 
 
-common::Matrix threads::multiplyMatricesParallel( const common::Matrix& lhs, const common::Matrix& rhs )
+common::Matrix threads::multiplyMatricesParallel( 
+    const common::Matrix& lhs, const common::Matrix& rhs, const size_t threadsCount )
 {
     if ( lhs.columns() != rhs.rows() )
     {
@@ -31,10 +35,20 @@ common::Matrix threads::multiplyMatricesParallel( const common::Matrix& lhs, con
     std::vector< std::thread > multiplyThreads;
     multiplyThreads.reserve( lhs.columns() );
 
-    for ( size_t pos = 0; pos < lhs.columns(); ++pos )
+        for ( size_t n = 0; n < threadsCount; ++n )
     {
-        multiplyThreads.emplace_back( &common::Matrix::multiplyRC
-            , std::cref( lhs ), std::cref( rhs ), std::ref( result ), pos );
+        multiplyThreads.emplace_back( [ &lhs, &rhs, &result, n, threadsCount ]() {
+            for ( size_t row = 0; row < lhs.rows(); ++row )
+            {
+                for ( size_t column = 0; column < rhs.columns(); ++column )
+                {
+                    if ( n == ( ( row + column ) % threadsCount ) )
+                    {
+                        result.set( row, column, common::Matrix::multiplyRC( lhs, rhs, row, column ) );
+                    }
+                }
+            }
+        } );
     }
 
     for ( auto& thread: multiplyThreads )

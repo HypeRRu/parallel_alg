@@ -98,6 +98,8 @@ void threads::Tasks::multiplyMatricesSerial( const common::Matrix& lhs, const co
 
 void threads::Tasks::multiplyMatricesParallel( const common::Matrix& lhs, const common::Matrix& rhs, common::Matrix& result )
 {
+    constexpr size_t threads = 8;
+
     waitForAtomicBool( calcAllowed_, true );
     if ( !isValid_.load( std::memory_order_seq_cst ) )
     {
@@ -105,7 +107,7 @@ void threads::Tasks::multiplyMatricesParallel( const common::Matrix& lhs, const 
         return;
     }
 
-    result = threads::multiplyMatricesParallel( lhs, rhs );
+    result = threads::multiplyMatricesParallel( lhs, rhs, threads );
 #ifdef DEBUG
     std::cout << "Result matrix (parallel)\n";
     common::Matrix::write( result, std::cout );
