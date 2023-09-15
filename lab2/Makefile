@@ -12,7 +12,7 @@ DEPEXT					:= d
 CC						:= LANG=en_US g++
 OPTIMIZATION			:= -O0 -g3
 CXXFLAGS				:= -Wall -Wextra -Wpedantic
-STANDART				:= -std=c++14
+STANDART				:= -std=c++17
 LIB						:=
 INC						:= -I$(INCDIR) -I/usr/local/include
 INCDEP					:= -I$(INCDIR)
@@ -27,27 +27,18 @@ THREADING_SRC			:= $(SRCDIR)/threads/threads.cpp $(COMMON_SRC) $(THREADS_SRC)
 THREADING_OBJ			:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(THREADING_SRC:.$(SRCEXT)=.$(OBJEXT)))
 THREADING_TARGET		:= $(TARGETDIR)/threading
 
-# threading extended files
-EXTENDED_SRC			:= $(SRCDIR)/threads/threads_extended.cpp $(COMMON_SRC) $(THREADS_SRC)
-EXTENDED_OBJ			:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(EXTENDED_SRC:.$(SRCEXT)=.$(OBJEXT)))
-EXTENDED_TARGET			:= $(TARGETDIR)/threading_extended
-
 # sources and objects list
 SOURCES					:= $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS					:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
 
 
-all: threading threading_extended
+all: threading
 
 threading: resources $(THREADING_TARGET)
-threading_extended: resources $(EXTENDED_TARGET)
 
 # link objects
 $(THREADING_TARGET): $(THREADING_OBJ)
 	$(CC) -o $(THREADING_TARGET) $^ $(LIB)
-
-$(EXTENDED_TARGET): $(EXTENDED_OBJ)
-	$(CC) -o $(EXTENDED_TARGET) $^ $(LIB)
 
 # remake
 remake: cleaner all

@@ -15,12 +15,40 @@ template < typename Task >
 class ThreadFabric
 {
 public:
+    ThreadFabric()
+    {}
+
     ~ThreadFabric()
     {
         tasks_.cancel();
+        wait();
     } // ~ThreadFabric
 
-    void addProducer( const std::function< const Task&() >& producer )
+    void wait()
+    {
+        for ( auto& producer: producers_ )
+        {
+            producer.join();
+        }
+        producers_.clear();
+        for ( auto& consumer: consumers_ )
+        {
+            consumer.join();
+        }
+        consumers_.clear();
+    } // wait
+
+    bool addTask( const Task& task )
+    {
+        return tasks_.push( task );
+    }
+
+    std::shared_ptr< Task > getTask()
+    {
+        return tasks_.pop_and_wait();
+    }
+
+    void addProducer( const std::function< Task&& () >& producer )
     {
         std::unique_lock< std::mutex > lockGuard{ producersMtx_ };
         producers_.emplace_back( &ThreadFabric::produce, this, producer );
@@ -38,7 +66,7 @@ private:
         while ( true )
         {
             const Task& task = producer();
-            if ( !tasks_.push( task ) )
+            if ( !addTask( task ) )
             {
                 break;
             }
@@ -50,7 +78,7 @@ private:
         std::shared_ptr< Task > task;
         while ( true )
         {
-            task = tasks_.pop();
+            task = getTask();
             if ( !task.get() )
             {
                 break;

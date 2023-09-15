@@ -20,6 +20,9 @@ template < typename T >
 class ThreadSafeQueue
 {
 public:
+    ThreadSafeQueue()
+        : cancel_{ false }
+    {}
     ThreadSafeQueue( const ThreadSafeQueue& ) = delete;
     ThreadSafeQueue& operator=( const ThreadSafeQueue& ) = delete;
     
@@ -83,7 +86,7 @@ public:
                 /// Окончание работы
                 break;
             }
-            value = std::make_shared( container_.front() );
+            value = std::make_shared< T >( container_.front() );
             container_.pop();
         }
         return value;
@@ -117,7 +120,7 @@ private:
 #endif // defined( ALLOW_SHARED_LOCKS )
     std::queue< T > container_;         ///< Очередь.
     std::condition_variable cond_;      ///< Условная переменная для синхронизации операций с очередью.
-    std::atomic_bool cancel_ = false;   ///< Атомарный флаг нужно ли закончить обработку очереди.
+    std::atomic_bool cancel_;   ///< Атомарный флаг нужно ли закончить обработку очереди.
 
 }; // class ThreadSafeQueue
 

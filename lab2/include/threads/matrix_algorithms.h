@@ -1,6 +1,8 @@
 #ifndef THREADS_MATRIX_ALGORITHMS_H
 #define THREADS_MATRIX_ALGORITHMS_H
 
+#include <cstddef>
+
 namespace common
 {
 
@@ -11,6 +13,13 @@ class Matrix;
 namespace threads
 {
 
+
+/// @brief Генерации матрицы.
+/// @param[in] rows Количество строк.
+/// @param[in] columns Количество столбцов.
+/// @return Матрица.
+common::Matrix generateMatrix( size_t rows, size_t columns );
+
 /// @brief Умножение двух матриц (последовательное).
 /// @param[in] lhs Умножаемая матрица (левый операнд).
 /// @param[in] rhs Матрица, на которую производится умножение (правый операнд).
@@ -20,8 +29,10 @@ common::Matrix multiplyMatricesSerial( const common::Matrix& lhs, const common::
 /// @brief Умножение двух матриц (параллельное).
 /// @param[in] lhs Умножаемая матрица (левый операнд).
 /// @param[in] rhs Матрица, на которую производится умножение (правый операнд).
+/// @param[in] threadsCount Количество потоков.
 /// @return Результирующая матрица.
-common::Matrix multiplyMatricesParallel( const common::Matrix& lhs, const common::Matrix& rhs );
+common::Matrix multiplyMatricesParallel( 
+    const common::Matrix& lhs, const common::Matrix& rhs, const size_t threadsCount );
 
 } // namespace threads
 

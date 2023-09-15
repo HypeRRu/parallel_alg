@@ -80,10 +80,11 @@ public:
     /// @param[in] lhs Умножаемая матрица (левый операнд).
     /// @param[in] rhs Матрица, на которую производится умножение (правый операнд).
     /// @param[in] result Результирующая матрица.
-    /// @param[in] pos Номер столбца lhs и строки rhs.
+    /// @param[in] row Номер строки lhs.
+    /// @param[in] column Номер столбца rhs.
     /// @return Значение элемента - результат умножения.
     /// @throws std::out_of_range в случае неверно заданного номера строки или столбца.
-    static void     multiplyRC( const Matrix& lhs, const Matrix& rhs, Matrix& result, size_t pos );
+    static float    multiplyRC( const Matrix& lhs, const Matrix& rhs, size_t row, size_t column );
 
 private:
     size_t rows_;               ///< Количество строк в матрице.
