@@ -3,7 +3,6 @@
 #include "common/defs.h"
 #include "threads/matrix_algorithms.h"
 
-
 // #define DEBUG
 
 #if defined( DEBUG )
@@ -13,9 +12,9 @@
 
 threads::TaskGen threads::Tasks::generateMatrices()
 {
-    constexpr size_t rows1 = 3;
-    constexpr size_t columns1Rows2 = 4;
-    constexpr size_t columns2 = 5;
+    constexpr size_t rows1 = 4;
+    constexpr size_t columns1Rows2 = 8;
+    constexpr size_t columns2 = 7;
     
     threads::TaskGen task{ { 0, 0 }, { 0, 0 } };
     task.first = threads::generateMatrix( rows1, columns1Rows2 );
@@ -32,25 +31,23 @@ threads::TaskGen threads::Tasks::generateMatrices()
 } // generateMatrices
 
 
-void threads::Tasks::multiplyMatricesSerial( const TaskGen& task, ThreadFabric< TaskOut >& outQueue )
+void threads::Tasks::multiplyMatricesSerial( const TaskGen& task, ThreadFactory< TaskOut >& outQueue )
 {
     TaskOut taskOut = threads::multiplyMatricesSerial( task.first, task.second );
     outQueue.addTask( std::move( taskOut ) );
 #ifdef DEBUG
-    std::cout << "Result matrix\n";
-    common::Matrix::write( taskOut, std::cout );
+    std::cout << "Calculation ended\n";
 #endif // DEBUG
 } // multiplyMatricesSerial
 
 
 void threads::Tasks::multiplyMatricesParallel( const TaskGen& task
-    , ThreadFabric< TaskOut >& outQueue, size_t threadsCount )
+    , ThreadFactory< TaskOut >& outQueue, size_t threadsCount )
 {
     TaskOut taskOut = threads::multiplyMatricesParallel( task.first, task.second, threadsCount );
     outQueue.addTask( std::move( taskOut ) );
 #ifdef DEBUG
-    std::cout << "Result matrix\n";
-    common::Matrix::write( taskOut, std::cout );
+    std::cout << "Calculation ended\n";
 #endif // DEBUG
 } // multiplyMatricesParallel
 
@@ -58,5 +55,6 @@ void threads::Tasks::multiplyMatricesParallel( const TaskGen& task
 void threads::Tasks::writeResultMatrix( const threads::TaskOut& task )
 {
     /// Вывод результата в файл
+    std::cout << "Result matrix\n";
     common::Matrix::write( task, std::cout );
 } // writeResultMatrix

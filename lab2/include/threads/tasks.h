@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "common/matrix.h"
-#include "threads/thread_fabric.hpp"
+#include "threads/thread_factory.hpp"
 
 namespace threads
 {
@@ -18,8 +18,8 @@ class Tasks
 {
 public:
     static TaskGen generateMatrices();
-    static void multiplyMatricesSerial( const TaskGen& task, ThreadFabric< TaskOut >& outQueue );
-    static void multiplyMatricesParallel( const TaskGen& task, ThreadFabric< TaskOut >& outQueue, size_t threadsCount );
+    static void multiplyMatricesSerial( const TaskGen& task, ThreadFactory< TaskOut >& outQueue );
+    static void multiplyMatricesParallel( const TaskGen& task, ThreadFactory< TaskOut >& outQueue, size_t threadsCount );
 
     static void writeResultMatrix( const TaskOut& task );
 }; // class Tasks

@@ -1,5 +1,5 @@
-#ifndef THREADS_THREAD_FABRIC_HPP
-#define THREADS_THREAD_FABRIC_HPP
+#ifndef THREADS_THREAD_FACTORY_HPP
+#define THREADS_THREAD_FACTORY_HPP
 
 #include <thread>
 #include <vector>
@@ -12,17 +12,17 @@ namespace threads
 {
 
 template < typename Task >
-class ThreadFabric
+class ThreadFactory
 {
 public:
-    ThreadFabric()
+    ThreadFactory()
     {}
 
-    ~ThreadFabric()
+    ~ThreadFactory()
     {
         tasks_.cancel();
         wait();
-    } // ~ThreadFabric
+    } // ~ThreadFactory
 
     void wait()
     {
@@ -48,22 +48,23 @@ public:
         return tasks_.pop_and_wait();
     }
 
-    void addProducer( const std::function< Task ( void ) >& producer )
+    void addProducer( const std::function< Task ( void ) >& producer, size_t limit = 0 )
     {
         std::unique_lock< std::mutex > lockGuard{ producersMtx_ };
-        producers_.emplace_back( &ThreadFabric::produce, this, producer );
+        producers_.emplace_back( &ThreadFactory::produce, this, producer, limit );
     } // addProducer
 
-    void addConsumer( const std::function< void( const Task& ) >& consumer )
+    void addConsumer( const std::function< void( const Task& ) >& consumer, size_t limit = 0 )
     {
         std::unique_lock< std::mutex > lockGuard{ producersMtx_ };
-        producers_.emplace_back( &ThreadFabric::consume, this, consumer );
+        producers_.emplace_back( &ThreadFactory::consume, this, consumer, limit );
     } // addConsumer
 
 private:
-    void produce( std::function< Task ( void ) > producer )
+    void produce( std::function< Task ( void ) > producer, size_t limit = 0 )
     {
-        while ( true )
+        bool infinite = ( 0 == limit );
+        while ( infinite || 0 < limit-- )
         {
             Task task = producer();
             if ( !addTask( std::move( task ) ) )
@@ -73,10 +74,11 @@ private:
         }
     } // produce
 
-    void consume( std::function< void( const Task& ) > consumer )
+    void consume( std::function< void( const Task& ) > consumer, size_t limit = 0 )
     {
+        bool infinite = ( 0 == limit );
         std::shared_ptr< Task > task;
-        while ( true )
+        while ( infinite || 0 < limit-- )
         {
             task = getTask();
             if ( !task.get() )
@@ -93,8 +95,8 @@ private:
     std::vector< std::thread > producers_;
     std::vector< std::thread > consumers_;
     ThreadSafeQueue< Task > tasks_;
-}; // class ThreadFabric
+}; // class ThreadFactory
 
 } // namespace threads
 
-#endif // THREADS_THREAD_FABRIC_HPP
+#endif // THREADS_THREAD_FACTORY_HPP
