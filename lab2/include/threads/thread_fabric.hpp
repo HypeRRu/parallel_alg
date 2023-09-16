@@ -38,9 +38,9 @@ public:
         consumers_.clear();
     } // wait
 
-    bool addTask( const Task& task )
+    bool addTask( Task&& task )
     {
-        return tasks_.push( task );
+        return tasks_.push( std::move( task ) );
     }
 
     std::shared_ptr< Task > getTask()
@@ -48,7 +48,7 @@ public:
         return tasks_.pop_and_wait();
     }
 
-    void addProducer( const std::function< Task&& () >& producer )
+    void addProducer( const std::function< Task ( void ) >& producer )
     {
         std::unique_lock< std::mutex > lockGuard{ producersMtx_ };
         producers_.emplace_back( &ThreadFabric::produce, this, producer );
@@ -61,12 +61,12 @@ public:
     } // addConsumer
 
 private:
-    void produce( std::function< const Task&() > producer )
+    void produce( std::function< Task ( void ) > producer )
     {
         while ( true )
         {
-            const Task& task = producer();
-            if ( !addTask( task ) )
+            Task task = producer();
+            if ( !addTask( std::move( task ) ) )
             {
                 break;
             }

@@ -3,7 +3,6 @@ SRCDIR					:= src
 INCDIR					:= include
 BUILDDIR				:= build
 TARGETDIR				:= target
-RESDIR					:= assets
 SRCEXT					:= cpp
 OBJEXT					:= o
 DEPEXT					:= d
@@ -12,7 +11,7 @@ DEPEXT					:= d
 CC						:= LANG=en_US g++
 OPTIMIZATION			:= -O0 -g3
 CXXFLAGS				:= -Wall -Wextra -Wpedantic
-STANDART				:= -std=c++17
+STANDART				:= -std=c++14
 LIB						:=
 INC						:= -I$(INCDIR) -I/usr/local/include
 INCDEP					:= -I$(INCDIR)
@@ -23,7 +22,7 @@ COMMON_SRC				:= $(SRCDIR)/common/matrix.cpp
 THREADS_SRC				:= $(SRCDIR)/threads/tasks.cpp $(SRCDIR)/threads/matrix_algorithms.cpp
 
 # threading files
-THREADING_SRC			:= $(SRCDIR)/threads/threads.cpp $(COMMON_SRC) $(THREADS_SRC)
+THREADING_SRC			:= $(SRCDIR)/threads/main.cpp $(COMMON_SRC) $(THREADS_SRC)
 THREADING_OBJ			:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(THREADING_SRC:.$(SRCEXT)=.$(OBJEXT)))
 THREADING_TARGET		:= $(TARGETDIR)/threading
 
@@ -34,7 +33,7 @@ OBJECTS					:= $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJE
 
 all: threading
 
-threading: resources $(THREADING_TARGET)
+threading: directories $(THREADING_TARGET)
 
 # link objects
 $(THREADING_TARGET): $(THREADING_OBJ)
@@ -43,15 +42,10 @@ $(THREADING_TARGET): $(THREADING_OBJ)
 # remake
 remake: cleaner all
 
-# copy resources
-resources: directories
-	@cp -r $(RESDIR)/* $(TARGETDIR)/$(RESDIR)/
-
 # make directories
 directories:
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(TARGETDIR)
-	@mkdir -p $(TARGETDIR)/$(RESDIR)/
 
 # clean only objects
 clean:

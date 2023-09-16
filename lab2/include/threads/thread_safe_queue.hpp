@@ -11,6 +11,7 @@
 #else // !defined( ALLOW_SHARED_LOCKS )
 #include <mutex>
 #endif // defined( ALLOW_SHARED_LOCKS )
+#include <iostream>
 
 
 namespace threads
@@ -47,7 +48,7 @@ public:
         cond_.notify_all();
     } // cancel
 
-    bool push( const T& value )
+    bool push( T&& value )
     {
         if ( cancel_.load( std::memory_order_acquire ) )
         {
@@ -74,9 +75,9 @@ public:
             std::unique_lock< std::mutex > lockGuard{ mtx_ };
 #endif // defined( ALLOW_SHARED_LOCKS )
             cond_.wait( lockGuard, [ this ](){
-                return !empty() || cancel_.load( std::memory_order_acquire );
+                return !container_.empty() || cancel_.load( std::memory_order_acquire );
             } );
-            if ( empty() )
+            if ( container_.empty() )
             {
                 /// Случайная разблокировка
                 continue;
@@ -88,6 +89,7 @@ public:
             }
             value = std::make_shared< T >( container_.front() );
             container_.pop();
+            break;
         }
         return value;
     } // pop_and_wait
@@ -120,7 +122,7 @@ private:
 #endif // defined( ALLOW_SHARED_LOCKS )
     std::queue< T > container_;         ///< Очередь.
     std::condition_variable cond_;      ///< Условная переменная для синхронизации операций с очередью.
-    std::atomic_bool cancel_;   ///< Атомарный флаг нужно ли закончить обработку очереди.
+    std::atomic_bool cancel_;           ///< Атомарный флаг нужно ли закончить обработку очереди.
 
 }; // class ThreadSafeQueue
 

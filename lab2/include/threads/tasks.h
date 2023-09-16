@@ -17,7 +17,7 @@ using TaskOut = common::Matrix;
 class Tasks
 {
 public:
-    static TaskGen&& generateMatrices();
+    static TaskGen generateMatrices();
     static void multiplyMatricesSerial( const TaskGen& task, ThreadFabric< TaskOut >& outQueue );
     static void multiplyMatricesParallel( const TaskGen& task, ThreadFabric< TaskOut >& outQueue, size_t threadsCount );
 
