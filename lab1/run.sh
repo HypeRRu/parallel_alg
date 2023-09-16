@@ -1,52 +1,39 @@
 print_usage ()
 {
-    echo "Usage: run.sh {processing|processing-unix|threading|threading-extended} [repeat-count] [threads-count]"
+    echo "Usage: run.sh {processing|threading|threading-extended} [repeat-count] [threads-count]"
 }
 
 run_type="${1}"
-reps_count="${2}"
+reps_count="${2:-100}"
 threads_count="${3:-8}"
 
 case "${run_type}" in
     processing)
-        TIMEFORMAT="Execution time (processing) real=%R user=%U sys=%S"
+        TIMEFORMAT="Execution time (processing, reps=${reps_count}) real=%R user=%U sys=%S"
         time {
-            for i in $(seq "${reps_count:-100}"); do
+            for i in $(seq ${reps_count}); do
                 ./target/processing
             done
-            mv assets/out.txt target/assets/out.processing.txt
         }
-    ;;
-    processing-unix)
-        TIMEFORMAT="Execution time (processing) real=%R user=%U sys=%S"
-        time {
-            for i in $(seq "${reps_count:-10}"); do
-                ./target/read_process &
-                sleep 0.1
-                ./target/calc_process &
-                sleep 0.1
-                ./target/write_process &
-            done
-            mv assets/out.txt target/assets/out.unix.txt
-        }
+        mv assets/out.txt target/assets/out.processing.txt
     ;;
     threading)
-        TIMEFORMAT="Execution time (threading) real=%R user=%U sys=%S"
+        TIMEFORMAT="Execution time (threading, reps=${reps_count}) real=%R user=%U sys=%S"
         time {
-            for i in $(seq "${reps_count:-100}"); do
+            for i in $(seq ${reps_count}); do
                 ./target/threading
             done
-            mv assets/out.txt target/assets/out.threading.txt
         }
+        mv assets/out.txt target/assets/out.threading.txt
     ;;
     threading-extended)
-        TIMEFORMAT="Execution time (threading-extended) real=%R user=%U sys=%S"
+        TIMEFORMAT="Execution time (threading-extended, reps=${reps_count}) real=%R user=%U sys=%S"
         time {
-            for i in $(seq "${reps_count:-100}"); do
+            for i in $(seq "${reps_count}"); do
                 ./target/threading_extended "${threads_count}"
             done
-            mv assets/out.txt target/assets/out.extended.txt
         }
+        mv assets/out.txt target/assets/out.extended.txt
     ;;
     *)
         print_usage

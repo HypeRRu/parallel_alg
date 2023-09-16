@@ -6,7 +6,7 @@
 
 #include "common/matrix.h"
 #include "ipc/defs.h"
-#include "ipc/unix_socket.h"
+#include "ipc/socket.h"
 #include "ipc/matrix_algorithms.h"
 
 
@@ -27,7 +27,6 @@ bool CalcProcessDo( ipc::Socket& readCalcSocket, ipc::Socket& calcWriteSocket );
 bool WriteProcessDo( ipc::Socket& calcWriteSocket );
 
 } // namespace ipc
-
 
 
 int main()
