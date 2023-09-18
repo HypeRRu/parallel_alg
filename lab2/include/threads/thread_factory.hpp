@@ -6,7 +6,7 @@
 #include <functional>
 #include <atomic>
 #include <mutex>
-#include "threads/thread_safe_queue.hpp"
+#include "threads/thread_safe_list.hpp"
 
 namespace threads
 {

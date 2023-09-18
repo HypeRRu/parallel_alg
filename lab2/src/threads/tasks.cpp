@@ -55,6 +55,10 @@ void threads::Tasks::multiplyMatricesParallel( const TaskGen& task
 void threads::Tasks::writeResultMatrix( const threads::TaskOut& task )
 {
     /// Вывод результата в файл
+#ifdef DEBUG
     std::cout << "Result matrix\n";
     common::Matrix::write( task, std::cout );
+#else
+    (void) task;
+#endif // DEBUG
 } // writeResultMatrix
