@@ -96,7 +96,7 @@ private:
     {
         std::unique_lock< std::mutex > headLockGuard{ headMtx_ };
         cond_.wait( headLockGuard, [ this ]() {
-            return head_ != getTail() || canceled_.load( std::memory_order_acquire );
+            return getTail() != head_ || canceled_.load( std::memory_order_acquire );
         } );
         return headLockGuard;
     } // waitData
@@ -105,12 +105,12 @@ private:
     {
         while ( true )
         {
-            std::unique_lock< std::mutex > headLockGuard( std::move( waitData() ) );
+            std::unique_lock< std::mutex > headLockGuard( waitData() );
             if ( canceled_.load( std::memory_order_acquire ) )
             {
                 break; // cancelled
             }
-            if ( head_ == getTail() )
+            if ( getTail() == head_ )
             {
                 continue; // suspicious unlock
             }

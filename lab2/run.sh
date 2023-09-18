@@ -1,14 +1,15 @@
 print_usage ()
 {
-    echo "Usage: run.sh [threads-count] [repeat-count]"
+    echo "Usage: run.sh [repeat-count] [threads-count] [producers-count] [consumers-count] [tasks-count]"
 }
 
-threads="${1:-1}"
-reps_count="${2:-1}"
+reps_count="${1:-1}"
+shift
 
-TIMEFORMAT="Execution time (threading, threads=${threads}, reps=${reps_count}) real=%R sec, user=%U sec, sys=%S sec"
+echo "threading $@"
+TIMEFORMAT="Execution time (threading, reps=${reps_count}) real=%R sec, user=%U sec, sys=%S sec"
 time {
     for i in $(seq ${reps_count}); do
-        ./target/threading "${threads}"
+        ./target/threading "$@"
     done
 }

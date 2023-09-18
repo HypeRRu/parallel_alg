@@ -3,8 +3,6 @@
 #include "common/defs.h"
 #include "threads/matrix_algorithms.h"
 
-// #define DEBUG
-
 #if defined( DEBUG )
 #include <iostream>
 #endif // defined( DEBUG )

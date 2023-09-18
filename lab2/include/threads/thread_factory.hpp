@@ -1,8 +1,6 @@
 #ifndef THREADS_THREAD_FACTORY_HPP
 #define THREADS_THREAD_FACTORY_HPP
 
-#define FINE_GRAINED_LOCK
-
 #include <thread>
 #include <vector>
 #include <functional>

@@ -10,7 +10,9 @@ DEPEXT					:= d
 # compiler settings
 CC						:= LANG=en_US g++
 OPTIMIZATION			:= -O0 -g3
-CXXFLAGS				:= -Wall -Wextra -Wpedantic
+OPTIONS					:= -DFINE_GRAINED_LOCK
+# OPTIONS					:=
+CXXFLAGS				:= -Wall -Wextra -Wpedantic $(OPTIONS)
 STANDART				:= -std=c++14
 LIB						:=
 INC						:= -I$(INCDIR) -I/usr/local/include
