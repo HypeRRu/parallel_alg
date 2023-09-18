@@ -2,13 +2,12 @@
 
 #include "threads/tasks.h"
 #include "threads/thread_factory.hpp"
-#include "threads/thread_safe_queue_fine.hpp"
 
-constexpr size_t producers = 1000;
-constexpr size_t consumers = 1000;
-constexpr size_t producerLimit = 500;
-constexpr size_t consumerLimit = 500;
-constexpr size_t outputLimit = 500000;
+constexpr size_t producers = 2;
+constexpr size_t consumers = 6;
+constexpr size_t producerLimit = 15000;
+constexpr size_t consumerLimit = 5000;
+constexpr size_t outputLimit = 30000;
 
 int main( int argc, char** argv )
 {

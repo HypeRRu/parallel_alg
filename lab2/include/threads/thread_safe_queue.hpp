@@ -22,20 +22,10 @@ class ThreadSafeQueue
 {
 public:
     ThreadSafeQueue()
-        : cancel_{ false }
+        : canceled_{ false }
     {}
     ThreadSafeQueue( const ThreadSafeQueue& ) = delete;
     ThreadSafeQueue& operator=( const ThreadSafeQueue& ) = delete;
-    
-    bool canceled() const
-    {
-#if defined( ALLOW_SHARED_LOCKS )
-        std::shared_lock< std::shared_mutex > lockGuard{ mtx_ };
-#else // !defined( ALLOW_SHARED_LOCKS )
-        std::unique_lock< std::mutex > lockGuard{ mtx_ };
-#endif // defined( ALLOW_SHARED_LOCKS )
-        return cancel_.load( std::memory_order_acquire );
-    }
 
     void cancel()
     {
@@ -44,13 +34,13 @@ public:
 #else // !defined( ALLOW_SHARED_LOCKS )
         std::unique_lock< std::mutex > lockGuard{ mtx_ };
 #endif // defined( ALLOW_SHARED_LOCKS )
-        cancel_.store( true, std::memory_order_release );
+        canceled_.store( true, std::memory_order_release );
         cond_.notify_all();
     } // cancel
 
     bool push( T&& value )
     {
-        if ( cancel_.load( std::memory_order_acquire ) )
+        if ( canceled_.load( std::memory_order_acquire ) )
         {
             return false;
         }
@@ -64,7 +54,7 @@ public:
         return true;
     } // push
 
-    std::shared_ptr< T > pop_and_wait()
+    std::shared_ptr< T > popAndWait()
     {
         std::shared_ptr< T > value = nullptr;
         while ( true )
@@ -75,14 +65,14 @@ public:
             std::unique_lock< std::mutex > lockGuard{ mtx_ };
 #endif // defined( ALLOW_SHARED_LOCKS )
             cond_.wait( lockGuard, [ this ](){
-                return !container_.empty() || cancel_.load( std::memory_order_acquire );
+                return !container_.empty() || canceled_.load( std::memory_order_acquire );
             } );
             if ( container_.empty() )
             {
                 /// Случайная разблокировка
                 continue;
             }
-            if ( cancel_.load( std::memory_order_acquire ) )
+            if ( canceled_.load( std::memory_order_acquire ) )
             {
                 /// Окончание работы
                 break;
@@ -92,27 +82,7 @@ public:
             break;
         }
         return value;
-    } // pop_and_wait
-
-    size_t size() const
-    {
-#if defined( ALLOW_SHARED_LOCKS )
-        std::shared_lock< std::shared_mutex > lockGuard{ mtx_ };
-#else // !defined( ALLOW_SHARED_LOCKS )
-        std::unique_lock< std::mutex > lockGuard{ mtx_ };
-#endif // defined( ALLOW_SHARED_LOCKS )
-        return container_.size();
-    } // size
-
-    bool empty() const
-    {
-#if defined( ALLOW_SHARED_LOCKS )
-        std::shared_lock< std::shared_mutex > lockGuard{ mtx_ };
-#else // !defined( ALLOW_SHARED_LOCKS )
-        std::unique_lock< std::mutex > lockGuard{ mtx_ };
-#endif // defined( ALLOW_SHARED_LOCKS )
-        return container_.empty();
-    } // empty
+    } // popAndWait
 
 private:
 #if defined( ALLOW_SHARED_LOCKS )
@@ -122,7 +92,7 @@ private:
 #endif // defined( ALLOW_SHARED_LOCKS )
     std::queue< T > container_;         ///< Очередь.
     std::condition_variable cond_;      ///< Условная переменная для синхронизации операций с очередью.
-    std::atomic_bool cancel_;           ///< Атомарный флаг нужно ли закончить обработку очереди.
+    std::atomic_bool canceled_;         ///< Атомарный флаг нужно ли закончить обработку очереди.
 
 }; // class ThreadSafeQueue
 

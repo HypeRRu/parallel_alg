@@ -1,12 +1,18 @@
 #ifndef THREADS_THREAD_FACTORY_HPP
 #define THREADS_THREAD_FACTORY_HPP
 
+#define FINE_GRAINED_LOCK
+
 #include <thread>
 #include <vector>
 #include <functional>
 #include <atomic>
 #include <mutex>
-#include "threads/thread_safe_list.hpp"
+#if defined( FINE_GRAINED_LOCK )
+#include "threads/thread_safe_queue_fine.hpp"
+#else // !defined( FINE_GRAINED_LOCK )
+#include "threads/thread_safe_queue.hpp"
+#endif // defined( FINE_GRAINED_LOCK )
 
 namespace threads
 {
@@ -45,7 +51,7 @@ public:
 
     std::shared_ptr< Task > getTask()
     {
-        return tasks_.pop_and_wait();
+        return tasks_.popAndWait();
     }
 
     void addProducer( const std::function< Task ( void ) >& producer, size_t limit = 0 )
